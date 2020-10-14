@@ -1,0 +1,49 @@
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: reload postfix
+  service:
+    name: postfix
+    state: reloaded
+
+- name: restart postfix
+  service:
+    name: postfix
+    state: restarted
+
+- name: reload postgres
+  service:
+    name: postgresql
+    state: reloaded
+
+- name: restart postgres
+  service:
+    name: postgresql
+    state: restarted
+
+- name: reload mailman
+  service:
+    name: mailman3
+    state: reloaded
+
+- name: restart mailman
+  service:
+    name: mailman3
+    state: restarted
+
+- name: reload mailman-web
+  service:
+    name: mailman3-web
+    state: reloaded
+
+- name: restart mailman-web
+  service:
+    name: mailman3-web
+    state: restarted

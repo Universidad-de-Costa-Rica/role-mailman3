@@ -1,0 +1,52 @@
+- name: install debconf utils
+  apt:
+    name:
+      - debconf
+      - debconf-utils
+    state: present
+
+- when: mailman3_install_postfix
+  block:
+    - name: set postfix debconf options
+      loop: "{{ mailman3_postfix_debconf }}"
+      when:
+        - item.vtype != 'password'
+      debconf:
+        name: "{{ item.name }}"
+        question: "{{ item.question }}"
+        vtype: "{{ item.vtype }}"
+        value: "{{ item.value }}"
+
+    - name: set postfix debconf passwords
+      loop: "{{ mailman3_postfix_debconf }}"
+      no_log: true
+      changed_when: false
+      when:
+        - item.vtype == 'password'
+      debconf:
+        name: "{{ item.name }}"
+        question: "{{ item.question }}"
+        vtype: "{{ item.vtype }}"
+        value: "{{ item.value }}"
+
+- name: set mailman3 debconf options
+  loop: "{{ mailman3_debconf }}"
+  when:
+    - item.vtype != 'password'
+  debconf:
+    name: "{{ item.name }}"
+    question: "{{ item.question }}"
+    vtype: "{{ item.vtype }}"
+    value: "{{ item.value }}"
+
+- name: set mailman3 debconf passwords
+  loop: "{{ mailman3_debconf }}"
+  no_log: true
+  changed_when: false
+  when:
+    - item.vtype == 'password'
+  debconf:
+    name: "{{ item.name }}"
+    question: "{{ item.question }}"
+    vtype: "{{ item.vtype }}"
+    value: "{{ item.value }}"

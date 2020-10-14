@@ -1,0 +1,37 @@
+{{ ansible_managed | comment }}
+{% if mailman3_nginx_main_template_content is defined %}
+{{ mailman3_nginx_main_template_content }}
+{% else %}
+user {{ mailman3_http_user }};
+worker_processes {{ mailman3_nginx_main_worker_processes }};
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+    worker_connections  {{ mailman3_nginx_main_worker_connections }};
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    server_tokens {{ mailman3_nginx_main_server_tokens }};
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout {{ mailman3_nginx_main_keepalive_timeout }};
+	tcp_nodelay on;
+	types_hash_max_size 2048;
+
+    error_log /var/log/nginx/error.log warn;
+    access_log /var/log/nginx/access.log main;
+
+    gzip on;
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+{% endif %}

@@ -1,0 +1,14 @@
+{{ ansible_managed | comment }}
+{% if mailman3_nginx_status_template_content is defined %}
+{{ mailman3_nginx_status_template_content }}
+{% else %}
+server {
+    listen 8080;
+    access_log off;
+    location /stub_status {
+        stub_status on;
+        allow 127.0.0.1;
+        deny all;
+    }
+}
+{% endif %}

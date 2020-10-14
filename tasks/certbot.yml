@@ -1,0 +1,46 @@
+- when: mailman3_install_certbot
+  block:
+  - name: install certbot
+    register: certbot_install
+    apt:
+      name: python-certbot-nginx
+      state: present
+
+  - name: check certbot certificates
+    command: certbot certificates
+    changed_when: false
+    register: certbot_certificates
+
+  - when:
+      - certbot_install is changed
+      - certbot_certificates.stdout is defined
+      - service_name not in certbot_certificates.stdout
+    block:
+      - name: temporarly reconfigure nginx for self sign
+        when: mailman3_nginx_template
+        vars:
+          mailman3_nginx_self_crt: true
+        template:
+          src: "{{ mailman3_nginx_template_src }}"
+          dest: "{{ mailman3_nginx_template_dest }}"
+          owner: "{{ mailman3_http_user }}"
+          group: "{{ mailman3_http_user }}"
+          mode: 0644
+          backup: true
+
+      - name: install certificate
+        shell: "certbot -n --nginx{{ ' --test-cert ' if certbot_install_test is
+          defined else ' ' }}-d {{ service_name }} --agree-tos
+          -m '{{ mailman3_install_certbot_mail }}'"
+        notify: reload nginx
+
+      - name: reconfigure nginx
+        when: mailman3_nginx_template
+        template:
+          src: "{{ mailman3_nginx_template_src }}"
+          dest: "{{ mailman3_nginx_template_dest }}"
+          owner: "{{ mailman3_http_user }}"
+          group: "{{ mailman3_http_user }}"
+          mode: 0644
+          backup: true
+        notify: reload nginx

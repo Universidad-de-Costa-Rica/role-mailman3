@@ -1,0 +1,19 @@
+---
+allow_duplicates: false
+
+galaxy_info:
+  author: Job Céspedes Ortiz
+  description: Install Mailman3 Suite alongside Nginx, Postfix,
+    Postgres and Cerbot on Debian 10
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+        - buster
+  galaxy_tags:
+    - mailman
+    - postfix
+    - nginx
+    - debian
+    - certbot

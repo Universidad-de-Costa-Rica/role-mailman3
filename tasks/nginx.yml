@@ -1,0 +1,57 @@
+- when: mailman3_install_nginx
+  block:
+  - name: install nginx
+    apt:
+      name: nginx
+      state: present
+
+  - name: nginx main config template
+    when: mailman3_nginx_main_template
+    template:
+      src: "{{ mailman3_nginx_main_template_src }}"
+      dest: "{{ mailman3_nginx_main_template_dest }}"
+      owner: "{{ mailman3_http_user }}"
+      group: "{{ mailman3_http_user }}"
+      mode: 0644
+      backup: true
+    notify: reload nginx
+
+  - name: nginx mailman config template
+    when: mailman3_nginx_template
+    template:
+      src: "{{ mailman3_nginx_template_src }}"
+      dest: "{{ mailman3_nginx_template_dest }}"
+      owner: "{{ mailman3_http_user }}"
+      group: "{{ mailman3_http_user }}"
+      mode: 0644
+      backup: true
+    notify: reload nginx
+
+  - name: nginx status template
+    when: mailman3_nginx_status_template
+    template:
+      src: "{{ mailman3_nginx_status_template_src }}"
+      dest: "{{ mailman3_nginx_status_template_dest }}"
+      owner: "{{ mailman3_http_user }}"
+      group: "{{ mailman3_http_user }}"
+      mode: 0644
+    notify: reload nginx
+
+  - name: remove nginx default config
+    when: mailman3_nginx_remove_default
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify: reload nginx
+
+  - when: mailman3_nginx_ssl
+    block:
+      - name: install self sign certificate fallback
+        apt:
+          name: ssl-cert
+          state: present
+
+      - name: install dhparam
+        openssl_dhparam:
+          path: /etc/nginx/dhparam.pem
+          size: 2048

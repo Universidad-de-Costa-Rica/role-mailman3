@@ -1,0 +1,205 @@
+mailman3_domain: example.com
+mailman3_service_name: "www.{{ mailman3_domain }}"
+mailman3_service_desc: Example List Server
+mailman3_locale: en
+mailman3_mail: "changeme@{{ mailman3_domain }}"
+mailman3_tz: UTC
+mailman3_update_translations: false
+
+# secrets, please change them
+mailman3_secret_key: "change_secretkey"
+mailman3_rest_api_pass: "change_api_pass"
+mailman3_archiver_key: "change_archiver_key"
+mailman3_db_pass: "change_db_pass"
+mailman3_web_db_pass: "change_web_db_pass"
+mailman3_web_admin_pass: "change_web_admin_pass"
+
+# nginx
+mailman3_install_nginx: true
+mailman3_http_user: www-data
+mailman3_nginx_remove_default: false
+mailman3_nginx_self_crt: "{{ not mailman3_install_certbot | bool }}"
+
+## nginx-main
+mailman3_nginx_main_template: false
+mailman3_nginx_main_template_src: nginx.conf.j2
+mailman3_nginx_main_template_dest: /etc/nginx/nginx.conf
+mailman3_nginx_main_worker_processes: auto
+mailman3_nginx_main_worker_connections: "1024"
+mailman3_nginx_main_server_tokens: "off"
+mailman3_nginx_main_keepalive_timeout: 65
+
+## nginx-mailman3
+mailman3_nginx_template: true
+mailman3_nginx_template_src: mailman3.conf.j2
+mailman3_nginx_template_dest: /etc/nginx/sites-enabled/mailman3.conf
+mailman3_nginx_ssl: true
+mailman3_nginx_ssl_options: "default_server http2"
+mailman3_nginx_client_max_body_size: 75M
+
+## nginx-status
+mailman3_nginx_status_template: true
+mailman3_nginx_status_template_src: status.conf.j2
+mailman3_nginx_status_template_dest: /etc/nginx/sites-enabled/status.conf
+
+# postfix
+mailman3_install_postfix: true
+mailman3_postfix_debconf:
+  - name: postfix
+    question: postfix/mailname
+    vtype: string
+    value: "{{ mailman3_service_name }}"
+  - name: postfix
+    question: postfix/main_mailer_type
+    vtype: select
+    value: Internet Site
+mailman3_postfix_main_cfg_file: /etc/postfix/main.cf
+mailman3_postfix_main_cfg:
+  recipient_delimiter: "+"
+  unknown_local_recipient_reject_code: "550"
+  owner_request_special: "no"
+  transport_maps: hash:/var/lib/mailman3/data/postfix_lmtp
+  local_recipient_maps: hash:/var/lib/mailman3/data/postfix_lmtp
+  relay_domains: hash:/var/lib/mailman3/data/postfix_domains
+
+# postgres
+mailman3_install_postgres: true
+
+# certbot
+mailman3_install_certbot: true
+mailman3_install_certbot_mail: "{{ mailman3_mail }}"
+
+# mailman3
+mailman3_cfg_file: /etc/mailman3/mailman.cfg
+mailman3_cfg:
+  mailman: # section
+    site_owner: "{{ mailman3_mail }}"
+    noreply_address: "noreply@{{ mailman3_domain }}"
+    default_language: "{{ mailman3_locale }}"
+  database:
+    url: "postgres://mailman3:{{ mailman3_db_pass }}@localhost/mailman3"
+  webservice:
+    admin_pass: "{{ mailman3_rest_api_pass }}"
+  archiver.hyperkitty:
+    class: mailman_hyperkitty.Archiver
+    enable: 'yes'
+    configuration: /etc/mailman3/mailman-hyperkitty.cfg
+# mta: # section
+#   incoming: mailman.mta.postfix.LMTP
+#   outgoing: mailman.mta.deliver.deliver
+#   smtp_host: localhost
+#   smtp_port: 25
+#   smtp_user:
+#   smtp_pass:
+#   lmtp_host: 127.0.0.1
+#   lmtp_port: 8024
+#   configuration: python:mailman.config.postfix
+
+mailman3_hyperkitty_cfg_file: /etc/mailman3/mailman-hyperkitty.cfg
+mailman3_hyperkitty_cfg:
+  general: # section
+    base_url: http://localhost/hyperkitty/
+    api_key: "{{ mailman3_archiver_key }}"
+
+mailman3_web_template: true
+mailman3_web_template_src: mailman-web.py.j2
+mailman3_web_template_dest: /etc/mailman3/mailman-web.py
+mailman3_web_admin_name: Mailman Suite Admin
+mailman3_web_admin_mail: root@localhost
+mailman3_web_language_code: en-us
+mailman3_web_domain: localhost.local
+mailman3_web_base_url: http://localhost/
+mailman3_web_apps:
+  - 'hyperkitty'
+  - 'postorius'
+  - 'django_mailman3'
+  # Uncomment the next line to enable the admin:
+  # - 'django.contrib.admin'
+  # Uncomment the next line to enable admin documentation:
+  # - 'django.contrib.admindocs'
+  - 'django.contrib.auth'
+  - 'django.contrib.contenttypes'
+  - 'django.contrib.sessions'
+  - 'django.contrib.sites'
+  - 'django.contrib.messages'
+  - 'django.contrib.staticfiles'
+  - 'rest_framework'
+  - 'django_gravatar'
+  - 'compressor'
+  - 'haystack'
+  - 'django_extensions'
+  - 'django_q'
+  - 'allauth'
+  - 'allauth.account'
+  - 'allauth.socialaccount'
+  - 'django_mailman3.lib.auth.fedora'
+  # - 'allauth.socialaccount.providers.openid'
+  # - 'allauth.socialaccount.providers.github'
+  # - 'allauth.socialaccount.providers.gitlab'
+  # - 'allauth.socialaccount.providers.google'
+  # - 'allauth.socialaccount.providers.facebook'
+  # - 'allauth.socialaccount.providers.twitter'
+  # - 'allauth.socialaccount.providers.stackexchange'
+
+mailman3_uwsgi_cfg_file: /etc/mailman3/uwsgi.ini
+# mailman3_uwsgi_cfg:
+#   uwsgi: # section
+#     threads: '4'
+
+mailman3_debconf:
+  - name: mailman3
+    question: mailman3/database-type
+    vtype: select
+    value: "pgsql"
+  - name: mailman3
+    question: mailman3/remote/newhost
+    vtype: string
+    value: "localhost"
+  - name: mailman3
+    question: mailman3/db/dbname
+    vtype: string
+    value: "mailman3"
+  - name: mailman3
+    question: mailman3/db/app-user
+    vtype: string
+    value: "mailman3@localhost"
+  - name: mailman3
+    question: mailman3/pgsql/app-pass
+    vtype: password
+    value: "{{ mailman3_db_pass }}"
+  - name: mailman3
+    question: mailman3/app-password-confirm
+    vtype: password
+    value: "{{ mailman3_db_pass }}"
+  - name: mailman3-web
+    question: mailman3-web/database-type
+    vtype: select
+    value: "pgsql"
+  - name: mailman3-web
+    question: mailman3-web/remote/newhost
+    vtype: string
+    value: "localhost"
+  - name: mailman3-web
+    question: mailman3-web/db/dbname
+    vtype: string
+    value: "mailman3web"
+  - name: mailman3-web
+    question: mailman3-web/db/app-user
+    vtype: string
+    value: "mailman3web@localhost"
+  - name: mailman3-web
+    question: mailman3-web/pgsql/app-pass
+    vtype: password
+    value: "{{ mailman3_web_db_pass }}"
+  - name: mailman3-web
+    question: mailman3-web/app-password-confirm
+    vtype: password
+    value: "{{ mailman3_web_db_pass }}"
+  - name: mailman3-web
+    question: mailman3-web/superuser-mail
+    vtype: string
+    value: "{{ mailman3_web_admin_mail }}"
+  - name: mailman3-web
+    question: mailman3-web/superuser-password
+    vtype: password
+    value: "{{ mailman3_web_admin_pass }}"

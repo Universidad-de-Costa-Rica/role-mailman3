@@ -1,0 +1,24 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+  # pull: no
+lint: |
+    yamllint .
+    ansible-lint
+    flake8
+platforms:
+  - name: instance_${MOLECULE_DISTRO:-debian10}
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
+    privileged: true
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    capabilities:
+      - SYS_ADMIN
+    published_ports:
+      - "127.1.1.2:5432:5432"
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+provisioner:
+  name: ansible

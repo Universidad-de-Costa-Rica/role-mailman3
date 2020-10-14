@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    mailman3_install_certbot: false
+  roles:
+    - role: >-
+        {{ lookup('env','GALAXY_ROLE_NAME') |
+        default( playbook_dir | dirname |
+        dirname | basename, true ) }}

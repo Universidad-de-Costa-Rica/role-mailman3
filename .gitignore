@@ -1,0 +1,5 @@
+*secrets.y*ml
+*vault.yml
+*.retry
+*/__pycache__
+*.pyc

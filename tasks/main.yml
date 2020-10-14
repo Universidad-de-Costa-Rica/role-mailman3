@@ -1,0 +1,11 @@
+- include_tasks: debconf.yml
+
+- include_tasks: nginx.yml
+
+- include_tasks: postfix.yml
+
+- include_tasks: postgres.yml
+
+- include_tasks: mailman3.yml
+
+- include_tasks: certbot.yml

@@ -1,0 +1,20 @@
+- when: mailman3_install_postfix
+  block:
+    - name: install postfix
+      apt:
+        name: postfix
+        state: present
+
+    - name: postfix main options
+      when: mailman3_postfix_main_cfg is defined and mailman3_postfix_main_cfg
+      with_dict: "{{ mailman3_postfix_main_cfg  }}"
+      ini_file:
+        allow_no_value: true
+        path: "{{ mailman3_postfix_main_cfg_file }}"
+        section: null
+        option: "{{ item.key }}"
+        value: "{{ item.value }}"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart postfix

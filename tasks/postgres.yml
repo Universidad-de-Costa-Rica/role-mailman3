@@ -1,0 +1,12 @@
+- when: mailman3_install_postgres
+  block:
+  - name: install postgres
+    when: mailman3_install_postgres
+    apt:
+      name: postgresql
+      state: present
+
+  - name: verify postgres is started
+    service:
+      name: postgresql
+      state: started

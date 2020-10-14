@@ -1,0 +1,138 @@
+- name: install extra pkgs
+  when: mailman3_extra_pkgs is defined
+  apt:
+    name: "{{ mailman3_extra_pkgs }}"
+    state: present
+
+- name: install mailman3
+  register: install_mailman3_status
+  apt:
+    name:
+      - mailman3-full
+      - gettext
+      - unzip
+    state: present
+
+- when: install_mailman3_status is changed
+  block:
+    - name: update site name
+      shell: "python3 /usr/share/mailman3-web/manage.py shell -c
+        \"from django.contrib.sites.models import Site;
+        Site.objects.filter(domain='example.com').update(domain='{{ mailman3_domain }}',
+        name='{{ mailman3_service_desc }}')\""
+
+    - name: Download file from a file path
+      register: download_translation_status
+      when: mailman3_update_translations is defined and mailman3_update_translations
+      get_url:
+        url: https://hosted.weblate.org/download/gnu-mailman/?format=zip
+        dest: /usr/share/mailman3-web/translations.zip
+
+- when: download_translation_status is changed
+  block:
+    - name: create locale dir
+      file:
+        path: /tmp/translations
+        state: directory
+        mode: 0755
+
+    - name: unarchive translations.zip
+      unarchive:
+        src: /usr/share/mailman3-web/translations.zip
+        dest: /tmp/translations
+        remote_src: true
+        mode: 0755
+
+    - name: copy translations
+      delegate_to: "{{ inventory_hostname }}"
+      loop:
+        - src: /tmp/translations/gnu-mailman/django-mailman3/django_mailman3/locale/
+          dest: /usr/lib/python3/dist-packages/django_mailman3/locale
+        - src: /tmp/translations/gnu-mailman/hyperkitty/hyperkitty/locale/
+          dest: /usr/lib/python3/dist-packages/hyperkitty/locale
+        - src: /tmp/translations/gnu-mailman/postorius/src/postorius/locale/
+          dest: /usr/lib/python3/dist-packages/postorius/locale
+        - src: /tmp/translations/gnu-mailman/mailman/src/mailman/messages/
+          dest: /usr/lib/python3/dist-packages/mailman/messages
+      synchronize:
+        checksum: true
+        recursive: true
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+
+    - name: generate .mo
+      notify:
+        - restart mailman
+        - restart mailman-web
+      loop:
+        - /usr/lib/python3/dist-packages/django_mailman3/locale
+        - /usr/lib/python3/dist-packages/hyperkitty/locale
+        - /usr/lib/python3/dist-packages/postorius/locale
+        - /usr/lib/python3/dist-packages/mailman/messages
+      shell: |
+        echo 'Generating mo files for GNU Mailman ...'
+        for file in `find {{ item }} -name '*.po'`
+        do
+          echo $file
+          msgfmt $file -o ${file%.po}.mo -v
+        done
+
+    - name: remote tmp
+      file:
+        path: /tmp/translations
+        state: absent
+
+- name: mailman cfg
+  when: mailman3_cfg is defined and mailman3_cfg
+  loop: "{{ mailman3_cfg | ini_dict_flatten }}"
+  cfg_file:
+    allow_no_value: true
+    path: "{{ mailman3_cfg_file }}"
+    section: "{{ item.section }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: list
+    mode: '0640'
+  notify: reload mailman
+
+- name: mailman hyperkitty cfg
+  when: mailman3_hyperkitty_cfg is defined and mailman3_hyperkitty_cfg
+  loop: "{{ mailman3_hyperkitty_cfg | ini_dict_flatten }}"
+  cfg_file:
+    allow_no_value: true
+    path: "{{ mailman3_hyperkitty_cfg_file }}"
+    section: "{{ item.section }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: list
+    mode: '0640'
+  notify: reload mailman
+
+- name: mailman web config template
+  when: mailman3_web_template
+  template:
+    src: "{{ mailman3_web_template_src }}"
+    dest: "{{ mailman3_web_template_dest }}"
+    owner: root
+    group: www-data
+    mode: 0640
+    backup: true
+  notify:
+    - restart mailman-web
+    - restart nginx
+
+- name: mailman uwsgi cfg
+  when: mailman3_uwsgi_cfg is defined and mailman3_uwsgi_cfg
+  loop: "{{ mailman3_uwsgi_cfg | ini_dict_flatten }}"
+  ini_file:
+    allow_no_value: true
+    path: "{{ mailman3_uwsgi_cfg_file }}"
+    section: "{{ item.section }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload mailman
