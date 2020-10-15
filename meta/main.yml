@@ -2,6 +2,7 @@
 allow_duplicates: false
 
 galaxy_info:
+  role_name: mailman3
   author: Job Céspedes Ortiz
   description: Install Mailman3 Suite alongside Nginx, Postfix,
     Postgres and Cerbot on Debian 10
