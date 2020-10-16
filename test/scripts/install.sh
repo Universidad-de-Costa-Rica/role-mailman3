@@ -5,6 +5,6 @@
 set -e
 
 test -f requirements.txt && pip install -r requirements.txt || echo "no requirements"
-pip install molecule docker ansible-lint yamllint flake8
+pip install molecule[docker] docker ansible-lint yamllint flake8
 
 set +e
