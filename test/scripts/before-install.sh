@@ -4,8 +4,9 @@
 # Fail if one of the commands of this script fails
 set -e
 
+basename=$(basename "`pwd`")
 cd ../
-mv $ROLE_NAME jobcespedes.$ROLE_NAME
-cd jobcespedes.$ROLE_NAME
+mv $basename $GALAXY_NAMESPACE.$ROLE_NAME
+cd $GALAXY_NAMESPACE.$ROLE_NAME
 
 set +e
