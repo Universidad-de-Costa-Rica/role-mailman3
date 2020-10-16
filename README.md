@@ -1,7 +1,7 @@
 Role Name: mailman3
 =========
 
-[![Build Status](https://travis-ci.org/Universidad-de-Costa-Rica/role-mailman3.svg?branch=master)](https://travis-ci.org/Universidad-de-Costa-Rica/role-mailman3)
+[![Build Status](https://travis-ci.com/Universidad-de-Costa-Rica/role-mailman3.svg?branch=master)](https://travis-ci.com/Universidad-de-Costa-Rica/role-mailman3)
 
 Install Mailman3 Suite alongside Nginx, Postfix, Postgres and Cerbot on Debian 10
 
