@@ -38,7 +38,7 @@ Example Playbook
     mailman3_web_db_pass: "change_web_db_pass"
     mailman3_web_admin_pass: "change_web_admin_pass"
   roles:
-    - jobcespedes.mailman3
+    - ucr.mailman3
 ```
 
 License

@@ -6,7 +6,7 @@ services:
 env:
   global:
     - ROLE_NAME: mailman3
-    - GALAXY_NAMESPACE: jobcespedes
+    - GALAXY_NAMESPACE: ucr
   matrix:
     - MOLECULE_DISTRO: debian10
 
