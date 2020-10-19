@@ -1,0 +1,36 @@
+---
+image: registry.git.ucr.ac.cr/ags-ci/docker-dind-molecule:latest
+
+services:
+  - name: docker:dind
+    entrypoint: ["env", "-u", "DOCKER_HOST"]
+    command: ["dockerd-entrypoint.sh"]
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  # See https://github.com/docker-library/docker/pull/166
+  DOCKER_TLS_CERTDIR: ""
+
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip"
+  ROLE_NAME: mailman3
+  PY_COLORS: "1"
+  ANSIBLE_FORCE_COLOR: "1"
+
+cache:
+  paths:
+    - .pip/
+
+before_script:
+  - docker info
+  - python3 --version
+  - test -f requirements.txt && python3 -m pip install -r requirements.txt || echo "no requirements"
+  - ansible --version
+  - molecule --version
+
+ansible-test:
+  stage: test
+  script:
+    - yamllint .
+    - ansible-lint
+    - molecule test --all
