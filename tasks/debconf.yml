@@ -5,46 +5,27 @@
       - debconf-utils
     state: present
 
-- when: mailman3_install_postfix
-  block:
-    - name: set postfix debconf options
-      loop: "{{ mailman3_postfix_debconf }}"
-      when:
-        - item.vtype != 'password'
-      debconf:
-        name: "{{ item.name }}"
-        question: "{{ item.question }}"
-        vtype: "{{ item.vtype }}"
-        value: "{{ item.value }}"
-
-    - name: set postfix debconf passwords
-      loop: "{{ mailman3_postfix_debconf }}"
-      no_log: true
-      changed_when: false
-      when:
-        - item.vtype == 'password'
-      debconf:
-        name: "{{ item.name }}"
-        question: "{{ item.question }}"
-        vtype: "{{ item.vtype }}"
-        value: "{{ item.value }}"
-
-- name: set mailman3 debconf options
-  loop: "{{ mailman3_debconf }}"
-  when:
-    - item.vtype != 'password'
+- name: set postfix debconf options
+  vars:
+    this_no_log: "{{ true if item.vtype == 'password' else false }}"
+  with_items: "{{ mailman3_postfix_debconf }}"
+  no_log: "{{ this_no_log }}"
+  when: mailman3_install_postfix
+  changed_when: (mailman3_postfix_debconf_status.changed if not this_no_log else false)
+  register: mailman3_postfix_debconf_status
   debconf:
     name: "{{ item.name }}"
     question: "{{ item.question }}"
     vtype: "{{ item.vtype }}"
     value: "{{ item.value }}"
 
-- name: set mailman3 debconf passwords
+- name: set mailman3 debconf options
   loop: "{{ mailman3_debconf }}"
-  no_log: true
-  changed_when: false
-  when:
-    - item.vtype == 'password'
+  vars:
+    this_no_log: "{{ true if item.vtype == 'password' else false }}"
+  no_log: "{{ this_no_log }}"
+  changed_when: (mailman3_postfix_debconf_status.changed if not this_no_log else false)
+  register: mailman3_debconf_status
   debconf:
     name: "{{ item.name }}"
     question: "{{ item.question }}"
