@@ -5,6 +5,7 @@
     apt:
       name: postgresql
       state: present
+      cache_valid_time: 600
 
   - name: verify postgres is started
     service:

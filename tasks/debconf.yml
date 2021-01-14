@@ -4,6 +4,7 @@
       - debconf
       - debconf-utils
     state: present
+    cache_valid_time: 600
 
 - name: set postfix debconf options
   vars:

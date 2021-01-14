@@ -4,6 +4,7 @@
     apt:
       name: nginx
       state: present
+      cache_valid_time: 600
 
   - name: nginx main config template
     when: mailman3_nginx_main_template
@@ -50,6 +51,7 @@
         apt:
           name: ssl-cert
           state: present
+          cache_valid_time: 600
 
       - name: install dhparam
         openssl_dhparam:

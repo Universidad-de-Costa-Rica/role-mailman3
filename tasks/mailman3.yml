@@ -3,6 +3,7 @@
   apt:
     name: "{{ mailman3_extra_pkgs }}"
     state: present
+    cache_valid_time: 600
 
 - name: install mailman3
   register: install_mailman3_status
@@ -12,6 +13,7 @@
       - gettext
       - unzip
     state: present
+    cache_valid_time: 600
 
 - when: install_mailman3_status is changed
   block:

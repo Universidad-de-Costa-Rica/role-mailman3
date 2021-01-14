@@ -4,6 +4,7 @@
       apt:
         name: postfix
         state: present
+        cache_valid_time: 600
 
     - name: postfix main options
       when: mailman3_postfix_main_cfg is defined and mailman3_postfix_main_cfg
