@@ -5,6 +5,7 @@
     apt:
       name: python-certbot-nginx
       state: present
+      cache_valid_time: 600
 
   - name: check certbot certificates
     command: certbot certificates
@@ -14,7 +15,7 @@
   - when:
       - certbot_install is changed
       - certbot_certificates.stdout is defined
-      - service_name not in certbot_certificates.stdout
+      - mailman3_service_name not in certbot_certificates.stdout
     block:
       - name: temporarly reconfigure nginx for self sign
         when: mailman3_nginx_template
@@ -30,7 +31,7 @@
 
       - name: install certificate
         shell: "certbot -n --nginx{{ ' --test-cert ' if certbot_install_test is
-          defined else ' ' }}-d {{ service_name }} --agree-tos
+          defined else ' ' }}-d {{ mailman3_service_name }} --agree-tos
           -m '{{ mailman3_install_certbot_mail }}'"
         notify: reload nginx
 
