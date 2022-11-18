@@ -1,4 +1,4 @@
-- when: mailman3_install_postfix
+- when: mailman3_configure_postfix
   block:
     - name: install postfix
       apt:

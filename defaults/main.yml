@@ -44,6 +44,7 @@ mailman3_nginx_status_template_dest: /etc/nginx/sites-enabled/status.conf
 
 # postfix
 mailman3_install_postfix: true
+mailman3_configure_postfix: '{{ mailman3_install_postfix | bool }}'
 mailman3_postfix_debconf:
   - name: postfix
     question: postfix/mailname
