@@ -25,7 +25,7 @@
   vars:
     this_no_log: "{{ true if item.vtype == 'password' else false }}"
   no_log: "{{ this_no_log }}"
-  changed_when: (mailman3_postfix_debconf_status.changed if not this_no_log else false)
+  changed_when: (mailman3_debconf_status.changed if not this_no_log else false)
   register: mailman3_debconf_status
   debconf:
     name: "{{ item.name }}"

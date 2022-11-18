@@ -1,8 +1,8 @@
 mailman3_domain: example.com
-mailman3_service_name: "www.{{ mailman3_domain }}"
+mailman3_server_name: "mailman.{{ mailman3_domain }}"
 mailman3_service_desc: Example List Server
 mailman3_locale: en
-mailman3_mail: "changeme@{{ mailman3_domain }}"
+mailman3_mail: "mailman-admin@{{ mailman3_domain }}"
 mailman3_tz: UTC
 mailman3_update_translations: false
 
@@ -44,11 +44,12 @@ mailman3_nginx_status_template_dest: /etc/nginx/sites-enabled/status.conf
 
 # postfix
 mailman3_install_postfix: true
+mailman3_configure_postfix: '{{ mailman3_install_postfix | bool }}'
 mailman3_postfix_debconf:
   - name: postfix
     question: postfix/mailname
     vtype: string
-    value: "{{ mailman3_service_name }}"
+    value: "{{ mailman3_server_name }}"
   - name: postfix
     question: postfix/main_mailer_type
     vtype: select
@@ -59,7 +60,7 @@ mailman3_postfix_main_cfg:
   unknown_local_recipient_reject_code: "550"
   owner_request_special: "no"
   transport_maps: hash:/var/lib/mailman3/data/postfix_lmtp
-  local_recipient_maps: hash:/var/lib/mailman3/data/postfix_lmtp
+  local_recipient_maps: hash:/var/lib/mailman3/data/postfix_lmtp $alias_maps
   relay_domains: hash:/var/lib/mailman3/data/postfix_domains
 
 # postgres
@@ -105,7 +106,9 @@ mailman3_web_template: true
 mailman3_web_template_src: mailman-web.py.j2
 mailman3_web_template_dest: /etc/mailman3/mailman-web.py
 mailman3_web_admin_name: Mailman Suite Admin
-mailman3_web_admin_mail: root@localhost
+mailman3_web_admin_mail: '{{ mailman3_mail }}'
+mailman3_web_from_email: 'postorius@{{ mailman3_server_name }}'
+mailman3_web_server_email: 'root@{{ mailman3_server_name }}'
 mailman3_web_language_code: en-us
 mailman3_web_domain: localhost.local
 mailman3_web_base_url: http://localhost/
@@ -114,7 +117,7 @@ mailman3_web_apps:
   - 'postorius'
   - 'django_mailman3'
   # Uncomment the next line to enable the admin:
-  # - 'django.contrib.admin'
+  - 'django.contrib.admin'
   # Uncomment the next line to enable admin documentation:
   # - 'django.contrib.admindocs'
   - 'django.contrib.auth'
@@ -132,7 +135,7 @@ mailman3_web_apps:
   - 'allauth'
   - 'allauth.account'
   - 'allauth.socialaccount'
-  - 'django_mailman3.lib.auth.fedora'
+  # - 'django_mailman3.lib.auth.fedora'
   # - 'allauth.socialaccount.providers.openid'
   # - 'allauth.socialaccount.providers.github'
   # - 'allauth.socialaccount.providers.gitlab'

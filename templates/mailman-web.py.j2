@@ -49,6 +49,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         #'ENGINE': 'django.db.backends.mysql',
         # DB name or path to database file if using sqlite3.
+        #'NAME': '/var/lib/mailman3/web/mailman3web.db',
         'NAME': 'mailman3web',
         # The following settings are not used with sqlite3:
         'USER': 'mailman3web',
@@ -113,14 +114,16 @@ EMAILNAME = '{{ mailman3_web_domain }}'
 # otherwise the emails may get rejected.
 # https://docs.djangoproject.com/en/1.8/ref/settings/#default-from-email
 # DEFAULT_FROM_EMAIL = "mailing-lists@you-domain.org"
-DEFAULT_FROM_EMAIL = 'postorius@{}'.format(EMAILNAME)
+# DEFAULT_FROM_EMAIL = 'postorius@{}'.format(EMAILNAME)
+DEFAULT_FROM_EMAIL = '{{ mailman3_web_from_email }}'
 
 # If you enable email reporting for error messages, this is where those emails
 # will appear to be coming from. Make sure you set a valid domain name,
 # otherwise the emails may get rejected.
 # https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SERVER_EMAIL
 # SERVER_EMAIL = 'root@your-domain.org'
-SERVER_EMAIL = 'root@{}'.format(EMAILNAME)
+# SERVER_EMAIL = 'root@{}'.format(EMAILNAME)
+SERVER_EMAIL = '{{ mailman3_web_server_email }}'
 
 
 # Django Allauth

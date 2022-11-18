@@ -85,6 +85,9 @@
         state: absent
 
 - name: mailman cfg
+  vars:
+    this_no_log: "{{ true if item.key.endswith('_pass') else false }}"
+  no_log: "{{ this_no_log }}"
   when: mailman3_cfg is defined and mailman3_cfg
   loop: "{{ mailman3_cfg | ini_dict_flatten }}"
   cfg_file:
@@ -99,6 +102,9 @@
   notify: reload mailman
 
 - name: mailman hyperkitty cfg
+  vars:
+    this_no_log: "{{ true if item.key.endswith('_key') else false }}"
+  no_log: "{{ this_no_log }}"
   when: mailman3_hyperkitty_cfg is defined and mailman3_hyperkitty_cfg
   loop: "{{ mailman3_hyperkitty_cfg | ini_dict_flatten }}"
   cfg_file:
